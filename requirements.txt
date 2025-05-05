@@ -1,5 +1,5 @@
-flask
-flask-cors
-undetected-chromedriver
-selenium
-
+selenium==4.31.0
+webdriver-manager==4.0.2
+undetected-chromedriver==3.2.4
+Flask==2.1.2
+flask-cors==3.1.1
