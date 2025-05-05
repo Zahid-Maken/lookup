@@ -2,4 +2,4 @@ flask
 flask-cors
 undetected-chromedriver
 selenium
-chromedriver-autoinstaller
+
