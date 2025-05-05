@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import undetected_chromedriver as uc
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 import time
 
 app = Flask(__name__)
@@ -20,13 +22,15 @@ def lookup():
         return jsonify({"error": "Phone number is required"}), 400
 
     try:
-        # Launch headless Chrome using undetected-chromedriver
-        options = uc.ChromeOptions()
+        # Launch headless Chrome using selenium
+        options = Options()
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
 
-        driver = uc.Chrome(options=options)
+        # Specify path to your ChromeDriver
+        service = Service('/path/to/chromedriver')  # Update with actual path
+        driver = webdriver.Chrome(service=service, options=options)
 
         driver.get("https://uspeoplesearch.com")
         time.sleep(2)
