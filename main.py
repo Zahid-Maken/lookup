@@ -1,13 +1,16 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+import chromedriver_autoinstaller
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import time
 
 app = Flask(__name__)
 CORS(app)
+
+# Automatically install the correct version of ChromeDriver
+chromedriver_autoinstaller.install()
 
 @app.route('/', methods=['GET'])
 def home():
@@ -21,22 +24,21 @@ def lookup():
     if not phone_number:
         return jsonify({"error": "Phone number is required"}), 400
 
-    driver = None  # Initialize driver to None to avoid UnboundLocalError
-
     try:
-        # Launch headless Chrome using selenium
+        # Launch headless Chrome using undetected-chromedriver
         options = Options()
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
 
-        # Specify path to your ChromeDriver
-        service = Service('/path/to/chromedriver')  # Update with actual path
-        driver = webdriver.Chrome(service=service, options=options)
+        # Use the undetected_chromedriver (automatically uses correct version of chromedriver)
+        driver = uc.Chrome(options=options)
 
+        # Navigate to the website
         driver.get("https://uspeoplesearch.com")
         time.sleep(2)
 
+        # Locate the search input, enter phone number, and click search button
         search_input = driver.find_element(By.XPATH, '//input[@type="text"]')
         search_input.send_keys(phone_number)
 
@@ -45,6 +47,7 @@ def lookup():
 
         time.sleep(5)
 
+        # Extract information from the page
         name = driver.find_element(By.XPATH, '//div[contains(text(), "PERSON NAME")]/following-sibling::div').text
         state = driver.find_element(By.XPATH, '//div[contains(text(), "State")]/following-sibling::div').text
         age = driver.find_element(By.XPATH, '//div[contains(text(), "AGE")]/following-sibling::div').text
@@ -59,8 +62,7 @@ def lookup():
         return jsonify({"error": str(e)}), 500
 
     finally:
-        if driver:  # Check if driver was initialized
-            driver.quit()
+        driver.quit()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
