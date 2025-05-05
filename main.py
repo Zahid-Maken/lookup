@@ -1,16 +1,13 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import chromedriver_autoinstaller
-import undetected_chromedriver as uc
-from selenium.webdriver.common.by import By
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 import time
 
 app = Flask(__name__)
 CORS(app)
-
-# Automatically install the correct version of ChromeDriver
-chromedriver_autoinstaller.install()
 
 @app.route('/', methods=['GET'])
 def home():
@@ -24,17 +21,15 @@ def lookup():
     if not phone_number:
         return jsonify({"error": "Phone number is required"}), 400
 
-    driver = None  # Initialize driver variable to handle its use in finally block
-
     try:
-        # Launch headless Chrome using undetected-chromedriver
+        # Launch Chrome with webdriver-manager
         options = Options()
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
 
-        # Use the undetected_chromedriver (automatically uses correct version of chromedriver)
-        driver = uc.Chrome(options=options)
+        # Use webdriver-manager to get the correct version of ChromeDriver
+        driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
         # Navigate to the website
         driver.get("https://uspeoplesearch.com")
@@ -64,8 +59,7 @@ def lookup():
         return jsonify({"error": str(e)}), 500
 
     finally:
-        if driver:  # Ensure driver.quit() is only called if driver is initialized
-            driver.quit()
+        driver.quit()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
