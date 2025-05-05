@@ -21,6 +21,8 @@ def lookup():
     if not phone_number:
         return jsonify({"error": "Phone number is required"}), 400
 
+    driver = None  # Initialize driver to None to avoid UnboundLocalError
+
     try:
         # Launch headless Chrome using selenium
         options = Options()
@@ -57,7 +59,8 @@ def lookup():
         return jsonify({"error": str(e)}), 500
 
     finally:
-        driver.quit()
+        if driver:  # Check if driver was initialized
+            driver.quit()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
